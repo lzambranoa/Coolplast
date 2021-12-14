@@ -1,7 +1,7 @@
 let coches = [];
 let frutas = [];
 let pokemon = [];
-let reverso = "img/reverso.png";
+let reverso = "img/reverso.jpg";
 
 function cargarImagenes() {
 
