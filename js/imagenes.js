@@ -5,17 +5,17 @@ let reverso = "img/reverso.png";
 
 function cargarImagenes() {
 
-	plastico1[0] = "img/plastico1/plastico1.png";
-	plastico1[1] = "img/plastico1/plastico2.png";
-	plastico1[2] = "img/plastico1/plastico3.png";
-	plastico1[3] = "img/plastico1/plastico4.png";
-	plastico1[4] = "img/plastico1/plastico5.png";
-	plastico1[5] = "img/plastico1/plastico6.png";
-	plastico1[6] = "img/plastico1/plastico7.png";
-	plastico1[7] = "img/plastico1/plastico8.png";
-	plastico1[8] = "img/plastico1/plastico9.png";
-	plastico1[9] = "img/plastico1/plastico10.png";
-	plastico1[10] = "img/plastico1/plastico11.png";
+	plastico1[0] = "/img/plastico1/plastico1.png";
+	plastico1[1] = "/img/plastico1/plastico2.png";
+	plastico1[2] = "/img/plastico1/plastico3.png";
+	plastico1[3] = "/img/plastico1/plastico4.png";
+	plastico1[4] = "/img/plastico1/plastico5.png";
+	plastico1[5] = "/img/plastico1/plastico6.png";
+	plastico1[6] = "/img/plastico1/plastico7.png";
+	plastico1[7] = "/img/plastico1/plastico8.png";
+	plastico1[8] = "/img/plastico1/plastico9.png";
+	plastico1[9] = "/img/plastico1/plastico10.png";
+	plastico1[10] = "/img/plastico1/plastico11.png";
 
 	frutas[1] = "img/frutas/ajo.jpg";
 	frutas[0] = "img/frutas/aguacate.jpg";

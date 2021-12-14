@@ -29,7 +29,7 @@ function dificultad() {
 			generarCartas(6, 18, pokemon);
 			break;
 		case "dificil":
-			generarCartas(8, 32, coches);
+			generarCartas(8, 32, plastico1);
 			break;
 	}
 	document.getElementById("modal").setAttribute("class", "hide");
