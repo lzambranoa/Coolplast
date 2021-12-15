@@ -23,13 +23,13 @@ function grid() {
 function dificultad() {
 	switch (this.id) {
 		case "facil":
-			generarCartas(4, 8, frutas);
+			generarCartas(4, 8, plastico1);
 			break;
 		case "medio":
-			generarCartas(6, 18, pokemon);
+			generarCartas(6, 18, plastico1);
 			break;
 		case "dificil":
-			generarCartas(4, 8, plastico1);
+			generarCartas(8, 32, plastico1);
 			break;
 	}
 	document.getElementById("modal").setAttribute("class", "hide");
