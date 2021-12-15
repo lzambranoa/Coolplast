@@ -319,3 +319,10 @@ input[type='image'] {
 .menuCSS3 ul li ul:hover {
     display: block;
 }
+
+.menu{
+    position: absolute;
+    top: 10%;
+    left: 5%;
+   
+}
