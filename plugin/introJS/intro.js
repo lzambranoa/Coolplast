@@ -1,15 +1,7 @@
-/**
- * Intro.js v2.9.3
- * https://github.com/usablica/intro.js
- *
- * Copyright (C) 2017 Afshin Mehrabani (@afshinmeh)
- */
 
 (function(f) {
     if (typeof exports === "object" && typeof module !== "undefined") {
         module.exports = f();
-        // deprecated function
-        // @since 2.8.0
         module.exports.introJs = function () {
           console.warn('Deprecated: please use require("intro.js") directly, instead of the introJs method of the function');
           // introJs()
@@ -44,69 +36,38 @@
     this._introItems = [];
 
     this._options = {
-      /* Next button label in tooltip box */
       nextLabel: 'Next &rarr;',
-      /* Previous button label in tooltip box */
       prevLabel: '&larr; Back',
-      /* Skip button label in tooltip box */
       skipLabel: 'Skip',
-      /* Done button label in tooltip box */
       doneLabel: 'Done',
-      /* Hide previous button in the first step? Otherwise, it will be disabled button. */
       hidePrev: false,
-      /* Hide next button in the last step? Otherwise, it will be disabled button. */
       hideNext: false,
-      /* Default tooltip box position */
       tooltipPosition: 'bottom',
-      /* Next CSS class for tooltip boxes */
       tooltipClass: '',
-      /* CSS class that is added to the helperLayer */
       highlightClass: '',
-      /* Close introduction when pressing Escape button? */
       exitOnEsc: true,
-      /* Close introduction when clicking on overlay layer? */
       exitOnOverlayClick: true,
-      /* Show step numbers in introduction? */
       showStepNumbers: true,
-      /* Let user use keyboard to navigate the tour? */
       keyboardNavigation: true,
-      /* Show tour control buttons? */
       showButtons: true,
-      /* Show tour bullets? */
       showBullets: true,
-      /* Show tour progress? */
       showProgress: false,
-      /* Scroll to highlighted element? */
       scrollToElement: true,
-      /*
-       * Should we scroll the tooltip or target element?
-       *
-       * Options are: 'element' or 'tooltip'
-       */
+
       scrollTo: 'element',
-      /* Padding to add after scrolling when element is not in the viewport (in pixels) */
       scrollPadding: 30,
-      /* Set the overlay opacity */
       overlayOpacity: 0.8,
-      /* Precedence of positions, when auto is enabled */
       positionPrecedence: ["bottom", "top", "right", "left"],
-      /* Disable an interaction with element? */
       disableInteraction: false,
-      /* Set how much padding to be used around helper element */
       helperElementPadding: 10,
-      /* Default hint position */
       hintPosition: 'top-middle',
-      /* Hint button label */
       hintButtonLabel: 'Got it',
-      /* Adding animation to hints? */
       hintAnimation: true,
-      /* additional classes to put on the buttons */
       buttonClass: "introjs-button"
     };
   }
 
   /**
-   * Initiate a new introduction/guide from an element in the page
    *
    * @api private
    * @method _introForElement
@@ -119,20 +80,15 @@
         introItems = [];
 
     if (this._options.steps) {
-      //use steps passed programmatically
       _forEach(this._options.steps, function (step) {
         var currentItem = _cloneObject(step);
 
-        //set the step
         currentItem.step = introItems.length + 1;
 
-        //use querySelector function only when developer used CSS selector
         if (typeof (currentItem.element) === 'string') {
-          //grab the element with given selector from the page
           currentItem.element = document.querySelector(currentItem.element);
         }
 
-        //intro without element
         if (typeof (currentItem.element) === 'undefined' || currentItem.element === null) {
           var floatingElementQuery = document.querySelector(".introjsFloatingElement");
 
@@ -159,24 +115,19 @@
       }.bind(this));
 
     } else {
-      //use steps from data-* annotations
       var elmsLength = allIntroSteps.length;
       var disableInteraction;
       
-      //if there's no element to intro
       if (elmsLength < 1) {
         return false;
       }
 
       _forEach(allIntroSteps, function (currentElement) {
         
-        // PR #80
-        // start intro for groups of elements
         if (group && (currentElement.getAttribute("data-intro-group") !== group)) {
           return;
         }
 
-        // skip hidden elements
         if (currentElement.style.display === 'none') {
           return;
         }
@@ -203,14 +154,11 @@
         }
       }.bind(this));
 
-      //next add intro items without data-step
       //todo: we need a cleanup here, two loops are redundant
       var nextStep = 0;
 
       _forEach(allIntroSteps, function (currentElement) {
         
-        // PR #80
-        // start intro for groups of elements
         if (group && (currentElement.getAttribute("data-intro-group") !== group)) {
           return;
         }
@@ -245,34 +193,27 @@
       }.bind(this));
     }
 
-    //removing undefined/null elements
     var tempIntroItems = [];
     for (var z = 0; z < introItems.length; z++) {
       if (introItems[z]) {
-        // copy non-falsy values to the end of the array
         tempIntroItems.push(introItems[z]);  
       } 
     }
 
     introItems = tempIntroItems;
 
-    //Ok, sort all items with given steps
     introItems.sort(function (a, b) {
       return a.step - b.step;
     });
 
-    //set it to the introJs object
     this._introItems = introItems;
 
-    //add overlay layer to the page
     if(_addOverlayLayer.call(this, targetElm)) {
-      //then, start the show
       _nextStep.call(this);
 
       if (this._options.keyboardNavigation) {
         DOMEvent.on(window, 'keydown', _onKeyDown, this, true);
       }
-      //for window resize
       DOMEvent.on(window, 'resize', _onResize, this, true);
     }
     return false;
@@ -283,19 +224,6 @@
   }
 
   /**
-  * on keyCode:
-  * https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/keyCode
-  * This feature has been removed from the Web standards.
-  * Though some browsers may still support it, it is in
-  * the process of being dropped.
-  * Instead, you should use KeyboardEvent.code,
-  * if it's implemented.
-  *
-  * jQuery's approach is to test for
-  *   (1) e.which, then
-  *   (2) e.charCode, then
-  *   (3) e.keyCode
-  * https://github.com/jquery/jquery/blob/a6b0705294d336ae2f63f7276de0da1195495363/src/event.js#L638
   *
   * @param type var
   * @return type
@@ -303,43 +231,40 @@
   function _onKeyDown (e) {
     var code = (e.code === null) ? e.which : e.code;
 
-    // if code/e.which is null
     if (code === null) {
       code = (e.charCode === null) ? e.keyCode : e.charCode;
     }
     
     if ((code === 'Escape' || code === 27) && this._options.exitOnEsc === true) {
-      //escape key pressed, exit the intro
-      //check if exit callback is defined
+
       _exitIntro.call(this, this._targetElement);
     } else if (code === 'ArrowLeft' || code === 37) {
-      //left arrow
+
       _previousStep.call(this);
     } else if (code === 'ArrowRight' || code === 39) {
-      //right arrow
+
       _nextStep.call(this);
     } else if (code === 'Enter' || code === 13) {
-      //srcElement === ie
+
       var target = e.target || e.srcElement;
       if (target && target.className.match('introjs-prevbutton')) {
-        //user hit enter while focusing on previous button
+
         _previousStep.call(this);
       } else if (target && target.className.match('introjs-skipbutton')) {
-        //user hit enter while focusing on skip button
+
         if (this._introItems.length - 1 === this._currentStep && typeof (this._introCompleteCallback) === 'function') {
             this._introCompleteCallback.call(this);
         }
 
         _exitIntro.call(this, this._targetElement);
       } else if (target && target.getAttribute('data-stepnumber')) {
-        // user hit enter while focusing on step bullet
+
         target.click();
       } else {
-        //default behavior for responding to enter
         _nextStep.call(this);
       }
 
-      //prevent default behaviour on hitting Enter, to prevent steps being skipped in some browsers
+
       if(e.preventDefault) {
         e.preventDefault();
       } else {
@@ -349,7 +274,6 @@
   }
 
  /*
-   * makes a copy of the object
    * @api private
    * @method _cloneObject
   */
@@ -368,13 +292,11 @@
       return temp;
   }
   /**
-   * Go to specific step of introduction
    *
    * @api private
    * @method _goToStep
    */
   function _goToStep(step) {
-    //because steps starts with zero
     this._currentStep = step - 2;
     if (typeof (this._introItems) !== 'undefined') {
       _nextStep.call(this);
@@ -382,7 +304,6 @@
   }
 
   /**
-   * Go to the specific step of introduction with the explicit [data-step] number
    *
    * @api private
    * @method _goToStepNumber
@@ -395,7 +316,6 @@
   }
 
   /**
-   * Go to next step on intro
    *
    * @api private
    * @method _nextStep
@@ -425,15 +345,12 @@
       continueStep = this._introBeforeChangeCallback.call(this, nextStep.element);
     }
 
-    // if `onbeforechange` returned `false`, stop displaying the element
     if (continueStep === false) {
       --this._currentStep;
       return false;
     }
 
     if ((this._introItems.length) <= this._currentStep) {
-      //end of the intro
-      //check if any callback is defined
       if (typeof (this._introCompleteCallback) === 'function') {
         this._introCompleteCallback.call(this);
       }
@@ -445,7 +362,6 @@
   }
 
   /**
-   * Go to previous step on intro
    *
    * @api private
    * @method _previousStep
@@ -466,7 +382,6 @@
       continueStep = this._introBeforeChangeCallback.call(this, nextStep.element);
     }
 
-    // if `onbeforechange` returned `false`, stop displaying the element
     if (continueStep === false) {
       ++this._currentStep;
       return false;
@@ -476,16 +391,13 @@
   }
 
   /**
-   * Update placement of the intro objects on the screen
    * @api private
    */
   function _refresh() {
-    // re-align intros
     _setHelperLayerPosition.call(this, document.querySelector('.introjs-helperLayer'));
     _setHelperLayerPosition.call(this, document.querySelector('.introjs-tooltipReferenceLayer'));
     _setHelperLayerPosition.call(this, document.querySelector('.introjs-disableInteraction'));
 
-    // re-align tooltip
     if(this._currentStep !== undefined && this._currentStep !== null) {
       var oldHelperNumberLayer = document.querySelector('.introjs-helperNumberLayer'),
         oldArrowLayer        = document.querySelector('.introjs-arrow'),
@@ -493,34 +405,26 @@
       _placeTooltip.call(this, this._introItems[this._currentStep].element, oldtooltipContainer, oldArrowLayer, oldHelperNumberLayer);
     }
 
-    //re-align hints
     _reAlignHints.call(this);
     return this;
   }
 
   /**
-   * Exit from intro
    *
    * @api private
    * @method _exitIntro
    * @param {Object} targetElement
-   * @param {Boolean} force - Setting to `true` will skip the result of beforeExit callback
+   * @param {Boolean} force 
    */
   function _exitIntro(targetElement, force) {
     var continueExit = true;
 
-    // calling onbeforeexit callback
-    //
-    // If this callback return `false`, it would halt the process
     if (this._introBeforeExitCallback !== undefined) {
       continueExit = this._introBeforeExitCallback.call(this);
     }
 
-    // skip this check if `force` parameter is `true`
-    // otherwise, if `onbeforeexit` returned `false`, don't exit the intro
     if (!force && continueExit === false) return;
 
-    //remove overlay layers from the page
     var overlayLayers = targetElement.querySelectorAll('.introjs-overlay');
 
     if (overlayLayers && overlayLayers.length) {
@@ -534,7 +438,6 @@
       }.bind(this));
     }
 
-    //remove all helper layers
     var helperLayer = targetElement.querySelector('.introjs-helperLayer');
     if (helperLayer) {
       helperLayer.parentNode.removeChild(helperLayer);
@@ -545,13 +448,11 @@
       referenceLayer.parentNode.removeChild(referenceLayer);
     }
 
-    //remove disableInteractionLayer
     var disableInteractionLayer = targetElement.querySelector('.introjs-disableInteraction');
     if (disableInteractionLayer) {
       disableInteractionLayer.parentNode.removeChild(disableInteractionLayer);
     }
 
-    //remove intro floating element
     var floatingElement = document.querySelector('.introjsFloatingElement');
     if (floatingElement) {
       floatingElement.parentNode.removeChild(floatingElement);
@@ -559,27 +460,22 @@
 
     _removeShowElement();
 
-    //remove `introjs-fixParent` class from the elements
     var fixParents = document.querySelectorAll('.introjs-fixParent');
     _forEach(fixParents, function (parent) {
       _removeClass(parent, /introjs-fixParent/g);
     });
 
-    //clean listeners
     DOMEvent.off(window, 'keydown', _onKeyDown, this, true);
     DOMEvent.off(window, 'resize', _onResize, this, true);
 
-    //check if any callback is defined
     if (this._introExitCallback !== undefined) {
       this._introExitCallback.call(this);
     }
 
-    //set the step to zero
     this._currentStep = undefined;
   }
 
   /**
-   * Render tooltip box in the page
    *
    * @api private
    * @method _placeTooltip
@@ -599,7 +495,6 @@
 
     hintMode = hintMode || false;
 
-    //reset the old style
     tooltipLayer.style.top        = null;
     tooltipLayer.style.right      = null;
     tooltipLayer.style.bottom     = null;
@@ -614,10 +509,8 @@
       helperNumberLayer.style.left = null;
     }
 
-    //prevent error when `this._currentStep` is undefined
     if (!this._introItems[this._currentStep]) return;
 
-    //if we have a custom css class for each step
     currentStepObj = this._introItems[this._currentStep];
     if (typeof (currentStepObj.tooltipClass) === 'string') {
       tooltipCssClass = currentStepObj.tooltipClass;
@@ -630,7 +523,6 @@
 
     currentTooltipPosition = this._introItems[this._currentStep].position;
 
-    // Floating is always valid, no point in calculating
     if (currentTooltipPosition !== "floating") { 
       currentTooltipPosition = _determineAutoPosition.call(this, targetElement, tooltipLayer, currentTooltipPosition);
     }
@@ -656,7 +548,6 @@
 
         var tooltipLayerStyleLeftRight = targetOffset.width / 2 - tooltipOffset.width / 2;
 
-        // a fix for middle aligned hints
         if (hintMode) {
           tooltipLayerStyleLeftRight += 5;
         }
@@ -669,7 +560,6 @@
         break;
 
       case 'top-left-aligned':
-      // top-left-aligned is the same as the default top
       case 'top':
         arrowLayer.className = 'introjs-arrow bottom';
 
@@ -681,8 +571,7 @@
       case 'right':
         tooltipLayer.style.left = (targetOffset.width + 20) + 'px';
         if (targetOffset.top + tooltipOffset.height > windowSize.height) {
-          // In this case, right would have fallen below the bottom of the screen.
-          // Modify so that the bottom of the tooltip connects with the target
+
           arrowLayer.className = "introjs-arrow left-bottom";
           tooltipLayer.style.top = "-" + (tooltipOffset.height - targetOffset.height - 20) + "px";
         } else {
@@ -695,8 +584,7 @@
         }
 
         if (targetOffset.top + tooltipOffset.height > windowSize.height) {
-          // In this case, left would have fallen below the bottom of the screen.
-          // Modify so that the bottom of the tooltip connects with the target
+
           tooltipLayer.style.top = "-" + (tooltipOffset.height - targetOffset.height - 20) + "px";
           arrowLayer.className = 'introjs-arrow right-bottom';
         } else {
@@ -708,7 +596,6 @@
       case 'floating':
         arrowLayer.style.display = 'none';
 
-        //we have to adjust the top and left of layer manually for intro items without element
         tooltipLayer.style.left   = '50%';
         tooltipLayer.style.top    = '50%';
         tooltipLayer.style.marginLeft = '-' + (tooltipOffset.width / 2)  + 'px';
@@ -733,7 +620,6 @@
 
         tooltipLayerStyleLeftRight = targetOffset.width / 2 - tooltipOffset.width / 2;
 
-        // a fix for middle aligned hints
         if (hintMode) {
           tooltipLayerStyleLeftRight += 5;
         }
@@ -745,10 +631,6 @@
         tooltipLayer.style.top = (targetOffset.height + 20) + 'px';
         break;
 
-      // case 'bottom-left-aligned':
-      // Bottom-left-aligned is the same as the default bottom
-      // case 'bottom':
-      // Bottom going to follow the default behavior
       default:
         arrowLayer.className = 'introjs-arrow top';
 
@@ -759,13 +641,11 @@
   }
 
   /**
-   * Set tooltip left so it doesn't go off the right side of the window
    *
    * @return boolean true, if tooltipLayerStyleLeft is ok.  false, otherwise.
    */
   function _checkRight(targetOffset, tooltipLayerStyleLeft, tooltipOffset, windowSize, tooltipLayer) {
     if (targetOffset.left + tooltipLayerStyleLeft + tooltipOffset.width > windowSize.width) {
-      // off the right side of the window
       tooltipLayer.style.left = (windowSize.width - tooltipOffset.width - targetOffset.left) + 'px';
       return false;
     }
@@ -774,13 +654,12 @@
   }
 
   /**
-   * Set tooltip right so it doesn't go off the left side of the window
    *
    * @return boolean true, if tooltipLayerStyleRight is ok.  false, otherwise.
    */
   function _checkLeft(targetOffset, tooltipLayerStyleRight, tooltipOffset, tooltipLayer) {
     if (targetOffset.left + targetOffset.width - tooltipLayerStyleRight - tooltipOffset.width < 0) {
-      // off the left side of the window
+
       tooltipLayer.style.left = (-targetOffset.left) + 'px';
       return false;
     }
@@ -789,8 +668,6 @@
   }
 
   /**
-   * Determines the position of the tooltip based on the position precedence and availability
-   * of screen space.
    *
    * @param {Object}    targetElement
    * @param {Object}    tooltipLayer
@@ -799,7 +676,6 @@
    */
   function _determineAutoPosition(targetElement, tooltipLayer, desiredTooltipPosition) {
 
-    // Take a clone of position precedence. These will be the available
     var possiblePositions = this._options.positionPrecedence.slice();
 
     var windowSize = _getWinSize();
@@ -807,15 +683,12 @@
     var tooltipWidth = _getOffset(tooltipLayer).width + 20;
     var targetElementRect = targetElement.getBoundingClientRect();
 
-    // If we check all the possible areas, and there are no valid places for the tooltip, the element
-    // must take up most of the screen real estate. Show the tooltip floating in the middle of the screen.
     var calculatedPosition = "floating";
 
     /*
     * auto determine position 
     */
 
-    // Check for space below
     if (targetElementRect.bottom + tooltipHeight + tooltipHeight > windowSize.height) {
       _removeEntry(possiblePositions, "bottom");
     }
@@ -845,25 +718,19 @@
       return '';
     })(desiredTooltipPosition || '');
 
-    // strip alignment from position
     if (desiredTooltipPosition) {
-      // ex: "bottom-right-aligned"
-      // should return 'bottom'
       desiredTooltipPosition = desiredTooltipPosition.split('-')[0];
     }
 
     if (possiblePositions.length) {
       if (desiredTooltipPosition !== "auto" &&
           possiblePositions.indexOf(desiredTooltipPosition) > -1) {
-        // If the requested position is in the list, choose that
         calculatedPosition = desiredTooltipPosition;
       } else {
-        // Pick the first valid position, in order
         calculatedPosition = possiblePositions[0];
       }
     }
 
-    // only top and bottom positions have optional alignments
     if (['top', 'bottom'].indexOf(calculatedPosition) !== -1) {
       calculatedPosition += _determineAutoAlignment(targetElementRect.left, tooltipWidth, windowSize, desiredAlignment);
     }
@@ -885,37 +752,26 @@
       possibleAlignments = ['-left-aligned', '-middle-aligned', '-right-aligned'],
       calculatedAlignment = '';
     
-    // valid left must be at least a tooltipWidth
-    // away from right side
     if (winWidth - offsetLeft < tooltipWidth) {
       _removeEntry(possibleAlignments, '-left-aligned');
     }
 
-    // valid middle must be at least half 
-    // width away from both sides
     if (offsetLeft < halfTooltipWidth || 
       winWidth - offsetLeft < halfTooltipWidth) {
       _removeEntry(possibleAlignments, '-middle-aligned');
     }
 
-    // valid right must be at least a tooltipWidth
-    // width away from left side
     if (offsetLeft < tooltipWidth) {
       _removeEntry(possibleAlignments, '-right-aligned');
     }
 
     if (possibleAlignments.length) {
       if (possibleAlignments.indexOf(desiredAlignment) !== -1) {
-        // the desired alignment is valid
         calculatedAlignment = desiredAlignment;
       } else {
-        // pick the first valid position, in order
         calculatedAlignment = possibleAlignments[0];
       }
     } else {
-      // if screen width is too small 
-      // for ANY alignment, middle is 
-      // probably the best for visibility
       calculatedAlignment = '-middle-aligned';
     }
 
@@ -923,7 +779,6 @@
   }
 
   /**
-   * Remove an entry from a string array if it's there, does nothing if it isn't there.
    *
    * @param {Array} stringArray
    * @param {String} stringToRemove
@@ -935,7 +790,6 @@
   }
 
   /**
-   * Update the position of the helper layer on the screen
    *
    * @api private
    * @method _setHelperLayerPosition
@@ -950,9 +804,6 @@
           elementPosition = _getOffset(currentElement.element),
           widthHeightPadding = this._options.helperElementPadding;
 
-      // If the target element is fixed, the tooltip should be fixed as well.
-      // Otherwise, remove a fixed class that may be left over from the previous
-      // step.
       if (_isFixed(currentElement.element)) {
         _addClass(helperLayer, 'introjs-fixedTooltip');
       } else {
@@ -963,7 +814,6 @@
         widthHeightPadding = 0;
       }
 
-      //set new position to helper layer
       helperLayer.style.cssText = 'width: ' + (elementPosition.width  + widthHeightPadding)  + 'px; ' +
                                         'height:' + (elementPosition.height + widthHeightPadding)  + 'px; ' +
                                         'top:'    + (elementPosition.top    - widthHeightPadding / 2)   + 'px;' +
@@ -973,7 +823,6 @@
   }
 
   /**
-   * Add disableinteraction layer and adjust the size and position of the layer
    *
    * @api private
    * @method _disableInteraction
@@ -991,7 +840,6 @@
   }
 
   /**
-   * Setting anchors to behave like buttons
    *
    * @api private
    * @method _setAnchorAsButton
@@ -1002,7 +850,6 @@
   }
 
   /**
-   * Show an element on the page
    *
    * @api private
    * @method _showElement
@@ -1022,11 +869,9 @@
         skipTooltipButton,
         scrollParent;
 
-    //check for a current step highlight class
     if (typeof (targetElement.highlightClass) === 'string') {
       highlightClass += (' ' + targetElement.highlightClass);
     }
-    //check for options highlight class
     if (typeof (this._options.highlightClass) === 'string') {
       highlightClass += (' ' + this._options.highlightClass);
     }
@@ -1041,9 +886,7 @@
       prevTooltipButton    = oldReferenceLayer.querySelector('.introjs-prevbutton');
       nextTooltipButton    = oldReferenceLayer.querySelector('.introjs-nextbutton');
 
-      //update or reset the helper highlight class
       oldHelperLayer.className = highlightClass;
-      //hide the tooltip
       oldtooltipContainer.style.opacity = 0;
       oldtooltipContainer.style.display = "none";
 
@@ -1055,44 +898,38 @@
         }
       }
 
-      // scroll to element
+
       scrollParent = _getScrollParent( targetElement.element );
 
       if (scrollParent !== document.body) {
-        // target is within a scrollable element
         _scrollParentToElement(scrollParent, targetElement.element);
       }
 
-      // set new position to helper layer
       _setHelperLayerPosition.call(self, oldHelperLayer);
       _setHelperLayerPosition.call(self, oldReferenceLayer);
 
-      //remove `introjs-fixParent` class from the elements
       var fixParents = document.querySelectorAll('.introjs-fixParent');
       _forEach(fixParents, function (parent) {
         _removeClass(parent, /introjs-fixParent/g);
       });
       
-      //remove old classes if the element still exist
       _removeShowElement();
 
-      //we should wait until the CSS3 transition is competed (it's 0.3 sec) to prevent incorrect `height` and `width` calculation
       if (self._lastShowElementTimer) {
         window.clearTimeout(self._lastShowElementTimer);
       }
 
       self._lastShowElementTimer = window.setTimeout(function() {
-        //set current step to the label
+        
         if (oldHelperNumberLayer !== null) {
           oldHelperNumberLayer.innerHTML = targetElement.step;
         }
-        //set current tooltip text
+        
         oldtooltipLayer.innerHTML = targetElement.intro;
-        //set the tooltip position
+        
         oldtooltipContainer.style.display = "block";
         _placeTooltip.call(self, targetElement.element, oldtooltipContainer, oldArrowLayer, oldHelperNumberLayer);
 
-        //change active bullet
         if (self._options.showBullets) {
             oldReferenceLayer.querySelector('.introjs-bullets li > a.active').className = '';
             oldReferenceLayer.querySelector('.introjs-bullets li > a[data-stepnumber="' + targetElement.step + '"]').className = 'active';
@@ -1100,24 +937,21 @@
         oldReferenceLayer.querySelector('.introjs-progress .introjs-progressbar').style.cssText = 'width:' + _getProgress.call(self) + '%;';
         oldReferenceLayer.querySelector('.introjs-progress .introjs-progressbar').setAttribute('aria-valuenow', _getProgress.call(self));
 
-        //show the tooltip
         oldtooltipContainer.style.opacity = 1;
         if (oldHelperNumberLayer) oldHelperNumberLayer.style.opacity = 1;
 
-        //reset button focus
         if (typeof skipTooltipButton !== "undefined" && skipTooltipButton !== null && /introjs-donebutton/gi.test(skipTooltipButton.className)) {
-          // skip button is now "done" button
           skipTooltipButton.focus();
         } else if (typeof nextTooltipButton !== "undefined" && nextTooltipButton !== null) {
-          //still in the tour, focus on next
+
           nextTooltipButton.focus();
         }
 
-        // change the scroll of the window, if needed
+ 
         _scrollTo.call(self, targetElement.scrollTo, targetElement, oldtooltipLayer);
       }, 350);
 
-      // end of old element if-else condition
+
     } else {
       var helperLayer       = document.createElement('div'),
           referenceLayer    = document.createElement('div'),
@@ -1131,19 +965,19 @@
       helperLayer.className = highlightClass;
       referenceLayer.className = 'introjs-tooltipReferenceLayer';
 
-      // scroll to element
+
       scrollParent = _getScrollParent( targetElement.element );
 
       if (scrollParent !== document.body) {
-        // target is within a scrollable element
+
         _scrollParentToElement(scrollParent, targetElement.element);
       }
 
-      //set new position to helper layer
+
       _setHelperLayerPosition.call(self, helperLayer);
       _setHelperLayerPosition.call(self, referenceLayer);
 
-      //add helper layer to target element
+
       this._targetElement.appendChild(helperLayer);
       this._targetElement.appendChild(referenceLayer);
 
@@ -1213,7 +1047,7 @@
       tooltipLayer.appendChild(bulletsLayer);
       tooltipLayer.appendChild(progressLayer);
 
-      //add helper layer number
+
       var helperNumberLayer = document.createElement('span');
       if (this._options.showStepNumbers === true) {
         helperNumberLayer.className = 'introjs-helperNumberLayer';
@@ -1224,7 +1058,6 @@
       tooltipLayer.appendChild(arrowLayer);
       referenceLayer.appendChild(tooltipLayer);
 
-      //next button
       nextTooltipButton = document.createElement('a');
 
       nextTooltipButton.onclick = function() {
@@ -1236,7 +1069,7 @@
       _setAnchorAsButton(nextTooltipButton);
       nextTooltipButton.innerHTML = this._options.nextLabel;
 
-      //previous button
+
       prevTooltipButton = document.createElement('a');
 
       prevTooltipButton.onclick = function() {
@@ -1248,7 +1081,7 @@
       _setAnchorAsButton(prevTooltipButton);
       prevTooltipButton.innerHTML = this._options.prevLabel;
 
-      //skip button
+
       skipTooltipButton = document.createElement('a');
       skipTooltipButton.className = this._options.buttonClass + ' introjs-skipbutton ';
       _setAnchorAsButton(skipTooltipButton);
@@ -1272,7 +1105,6 @@
 
       buttonsLayer.appendChild(skipTooltipButton);
 
-      //in order to prevent displaying next/previous button always
       if (this._introItems.length > 1) {
         buttonsLayer.appendChild(prevTooltipButton);
         buttonsLayer.appendChild(nextTooltipButton);
@@ -1280,27 +1112,21 @@
 
       tooltipLayer.appendChild(buttonsLayer);
 
-      //set proper position
       _placeTooltip.call(self, targetElement.element, tooltipLayer, arrowLayer, helperNumberLayer);
 
-      // change the scroll of the window, if needed
       _scrollTo.call(this, targetElement.scrollTo, targetElement, tooltipLayer);
 
-      //end of new element if-else condition
     }
 
-    // removing previous disable interaction layer
     var disableInteractionLayer = self._targetElement.querySelector('.introjs-disableInteraction');
     if (disableInteractionLayer) {
       disableInteractionLayer.parentNode.removeChild(disableInteractionLayer);
     }
 
-    //disable interaction
     if (targetElement.disableInteraction) {
       _disableInteraction.call(self);
     }
 
-    // when it's the first step of tour
     if (this._currentStep === 0 && this._introItems.length > 1) {
       if (typeof skipTooltipButton !== "undefined" && skipTooltipButton !== null) {
         skipTooltipButton.className = this._options.buttonClass + ' introjs-skipbutton';
@@ -1326,10 +1152,10 @@
         skipTooltipButton.innerHTML = this._options.skipLabel;
       }
     } else if (this._introItems.length - 1 === this._currentStep || this._introItems.length === 1) {
-      // last step of tour
+
       if (typeof skipTooltipButton !== "undefined" && skipTooltipButton !== null) {
         skipTooltipButton.innerHTML = this._options.doneLabel;
-        // adding donebutton class in addition to skipbutton
+
         _addClass(skipTooltipButton, 'introjs-donebutton');
       }
       if (typeof prevTooltipButton !== "undefined" && prevTooltipButton !== null) {
@@ -1349,7 +1175,6 @@
         }
       }
     } else {
-      // steps between start and end
       if (typeof skipTooltipButton !== "undefined" && skipTooltipButton !== null) {
         skipTooltipButton.className = this._options.buttonClass + ' introjs-skipbutton';
       }
@@ -1368,7 +1193,6 @@
     nextTooltipButton.setAttribute('role', 'button');
     skipTooltipButton.setAttribute('role', 'button');
 
-    //Set focus on "next" button, so that hitting Enter always moves you onto the next step
     if (typeof nextTooltipButton !== "undefined" && nextTooltipButton !== null) {
       nextTooltipButton.focus();
     }
@@ -1381,7 +1205,6 @@
   }
 
   /**
-   * To change the scroll of `window` after highlighting an element
    *
    * @api private
    * @method _scrollTo
@@ -1406,8 +1229,6 @@
       var top = rect.bottom - (rect.bottom - rect.top);
 
       // TODO (afshinm): do we need scroll padding now?
-      // I have changed the scroll option and now it scrolls the window to
-      // the center of the target element or tooltip.
 
       if (top < 0 || targetElement.element.clientHeight > winHeight) {
         window.scrollBy(0, rect.top - ((winHeight / 2) -  (rect.height / 2)) - this._options.scrollPadding); // 30px padding from edge to look nice
@@ -1420,7 +1241,6 @@
   }
 
   /**
-   * To remove all show element(s)
    *
    * @api private
    * @method _removeShowElement
@@ -1433,9 +1253,7 @@
     });
   }
 
-  /**
-   * To set the show element
-   * This function set a relative (in most cases) position and changes the z-index
+  /**-index
    *
    * @api private
    * @method _setShowElement
@@ -1443,8 +1261,6 @@
    */
   function _setShowElement(targetElement) {
     var parentElm;
-    // we need to add this show element class to the parent of SVG elements
-    // because the SVG elements can't have independent z-index
     if (targetElement.element instanceof SVGElement) {
       parentElm = targetElement.element.parentNode;
 
@@ -1473,8 +1289,7 @@
     while (parentElm !== null) {
       if (!parentElm.tagName || parentElm.tagName.toLowerCase() === 'body') break;
 
-      //fix The Stacking Context problem.
-      //More detail: https://developer.mozilla.org/en-US/docs/Web/Guide/CSS/Understanding_z_index/The_stacking_context
+
       var zIndex = _getPropValue(parentElm, 'z-index');
       var opacity = parseFloat(_getPropValue(parentElm, 'opacity'));
       var transform = _getPropValue(parentElm, 'transform') || _getPropValue(parentElm, '-webkit-transform') || _getPropValue(parentElm, '-moz-transform') || _getPropValue(parentElm, '-ms-transform') || _getPropValue(parentElm, '-o-transform');
@@ -1495,7 +1310,7 @@
   * @return {Null}
   */
   function _forEach(arr, forEachFnc, completeFnc) {
-    // in case arr is an empty query selector node list
+    
     if (arr) {
       for (var i = 0, len = arr.length; i < len; i++) {
         forEachFnc(arr[i], i);
@@ -1508,8 +1323,6 @@
   }
 
   /**
-  * Mark any object with an incrementing number
-  * used for keeping track of objects
   *
   * @param Object obj   Any object or DOM Element
   * @param String key
@@ -1548,7 +1361,6 @@
       var events_key = 'introjs_event';
       
       /**
-      * Gets a unique ID for an event listener
       *
       * @param Object obj
       * @param String type        event type
@@ -1561,7 +1373,6 @@
       };
 
       /**
-      * Adds event listener
       *
       * @param Object obj
       * @param String type        event type
@@ -1587,7 +1398,6 @@
       };
 
       /**
-      * Removes event listener
       *
       * @param Object obj
       * @param String type        event type
@@ -1618,7 +1428,6 @@
   })();
 
   /**
-   * Append a class to an element
    *
    * @api private
    * @method _addClass
@@ -1647,7 +1456,6 @@
   }
 
   /**
-   * Remove a class from an element
    *
    * @api private
    * @method _removeClass
@@ -1666,8 +1474,6 @@
   }
 
   /**
-   * Get an element CSS property on the page
-   * Thanks to JavaScript Kit: http://www.javascriptkit.com/dhtmltutors/dhtmlcascade4.shtml
    *
    * @api private
    * @method _getPropValue
@@ -1692,7 +1498,6 @@
   }
 
   /**
-   * Checks to see if target element (or parents) position is fixed or not
    *
    * @api private
    * @method _isFixed
@@ -1714,8 +1519,6 @@
   }
 
   /**
-   * Provides a cross-browser way to get the screen dimensions
-   * via: http://stackoverflow.com/questions/5864467/internet-explorer-innerheight
    *
    * @api private
    * @method _getWinSize
@@ -1731,9 +1534,6 @@
   }
 
   /**
-   * Check to see if the element is in the viewport or not
-   * http://stackoverflow.com/questions/123999/how-to-tell-if-a-dom-element-is-visible-in-the-current-viewport
-   *
    * @api private
    * @method _elementInViewport
    * @param {Object} el
@@ -1750,7 +1550,6 @@
   }
 
   /**
-   * Add overlay layer to the page
    *
    * @api private
    * @method _addOverlayLayer
@@ -1761,15 +1560,13 @@
         styleText = '',
         self = this;
 
-    //set css class name
     overlayLayer.className = 'introjs-overlay';
 
-    //check if the target element is body, we should calculate the size of overlay layer in a better way
     if (!targetElm.tagName || targetElm.tagName.toLowerCase() === 'body') {
       styleText += 'top: 0;bottom: 0; left: 0;right: 0;position: fixed;';
       overlayLayer.style.cssText = styleText;
     } else {
-      //set overlay layer position
+
       var elementPosition = _getOffset(targetElm);
       if (elementPosition) {
         styleText += 'width: ' + elementPosition.width + 'px; height:' + elementPosition.height + 'px; top:' + elementPosition.top + 'px;left: ' + elementPosition.left + 'px;';
@@ -1794,7 +1591,6 @@
   }
 
   /**
-   * Removes open hint (tooltip hint)
    *
    * @api private
    * @method _removeHintTooltip
@@ -1810,7 +1606,6 @@
   }
 
   /**
-   * Start parsing hint items
    *
    * @api private
    * @param {Object} targetElm
@@ -1825,7 +1620,6 @@
         var currentItem = _cloneObject(hint);
 
         if (typeof(currentItem.element) === 'string') {
-          //grab the element with given selector from the page
           currentItem.element = document.querySelector(currentItem.element);
         }
 
@@ -1843,7 +1637,6 @@
         return false;
       }
 
-      //first add intro items with data-step
       _forEach(hints, function (currentElement) {
         // hint animation
         var hintAnimation = currentElement.getAttribute('data-hintanimation');
@@ -1869,14 +1662,12 @@
 
     /* 
     todo:
-    these events should be removed at some point 
     */
     DOMEvent.on(document, 'click', _removeHintTooltip, this, false);
     DOMEvent.on(window, 'resize', _reAlignHints, this, true);
   }
 
   /**
-   * Re-aligns all hint elements
    *
    * @api private
    * @method _reAlignHints
@@ -1892,7 +1683,6 @@
   }
 
   /**
-  * Get a queryselector within the hint wrapper
   *
   * @param {String} selector
   * @return {NodeList|Array}
@@ -1903,7 +1693,6 @@
   }
 
   /**
-   * Hide a hint
    *
    * @api private
    * @method _hideHint
@@ -1917,14 +1706,12 @@
       _addClass(hint, 'introjs-hidehint');
     }
 
-    // call the callback function (if any)
     if (typeof (this._hintCloseCallback) !== 'undefined') {
       this._hintCloseCallback.call(this, stepId);
     }
   }
 
   /**
-   * Hide all hints
    *
    * @api private
    * @method _hideHints
@@ -1938,7 +1725,6 @@
   }
 
   /**
-   * Show all hints
    *
    * @api private
    * @method _showHints
@@ -1970,8 +1756,6 @@
   }
 
   /**
-   * Removes all hint elements on the page
-   * Useful when you want to destroy the elements and add them again (e.g. a modal or popup)
    *
    * @api private
    * @method _removeHints
@@ -1985,9 +1769,6 @@
   }
 
   /**
-   * Remove one single hint element from the page
-   * Useful when you want to destroy the element and add them again (e.g. a modal or popup)
-   * Use removeHints if you want to remove all elements.
    *
    * @api private
    * @method _removeHint
@@ -2001,7 +1782,6 @@
   }
 
   /**
-   * Add all available hints to the page
    *
    * @api private
    * @method _addHints
@@ -2017,7 +1797,6 @@
     }
 
     /**
-    * Returns an event handler unique to the hint iteration
     * 
     * @param {Integer} i
     * @return {Function}
@@ -2038,8 +1817,7 @@
       };
     };
 
-    _forEach(this._introItems, function(item, i) {
-      // avoid append a hint twice
+    _forEach(this._introItems, function(item, i) {e
       if (document.querySelector('.introjs-hint[data-step="' + i + '"]')) {
         return;
       }
@@ -2055,7 +1833,6 @@
         _addClass(hint, 'introjs-hint-no-anim');
       }
 
-      // hint's position should be fixed if the target element's position is fixed
       if (_isFixed(item.element)) {
         _addClass(hint, 'introjs-fixedhint');
       }
@@ -2069,28 +1846,25 @@
       hint.appendChild(hintPulse);
       hint.setAttribute('data-step', i);
 
-      // we swap the hint element with target element
-      // because _setHelperLayerPosition uses `element` property
       item.targetElement = item.element;
       item.element = hint;
 
-      // align the hint position
+     
       _alignHintPosition.call(this, item.hintPosition, hint, item.targetElement);
 
       hintsWrapper.appendChild(hint);
     }.bind(this));
 
-    // adding the hints wrapper
+   
     document.body.appendChild(hintsWrapper);
 
-    // call the callback function (if any)
+    
     if (typeof (this._hintsAddedCallback) !== 'undefined') {
       this._hintsAddedCallback.call(this);
     }
   }
 
   /**
-   * Aligns hint position
    *
    * @api private
    * @method _alignHintPosition
@@ -2099,7 +1873,7 @@
    * @param {Object} element
    */
   function _alignHintPosition(position, hint, element) {
-    // get/calculate offset of target element
+  
     var offset = _getOffset.call(this, element);
     var iconWidth = 20;
     var iconHeight = 20;
@@ -2147,7 +1921,6 @@
   }
 
   /**
-   * Triggers when user clicks on the hint element
    *
    * @api private
    * @method _showHintDialog
@@ -2157,7 +1930,7 @@
     var hintElement = document.querySelector('.introjs-hint[data-step="' + stepId + '"]');
     var item = this._introItems[stepId];
 
-    // call the callback function (if any)
+ 
     if (typeof (this._hintClickCallback) !== 'undefined') {
       this._hintClickCallback.call(this, hintElement, item, stepId);
     }
@@ -2178,11 +1951,11 @@
     tooltipLayer.className = 'introjs-tooltip';
 
     tooltipLayer.onclick = function (e) {
-      //IE9 & Other Browsers
+      
       if (e.stopPropagation) {
         e.stopPropagation();
       }
-      //IE8 and Lower
+   r
       else {
         e.cancelBubble = true;
       }
@@ -2207,7 +1980,7 @@
 
     tooltipLayer.appendChild(tooltipTextLayer);
 
-    // set current step for _placeTooltip function
+
     this._currentStep = hintElement.getAttribute('data-step');
 
     // align reference layer position
@@ -2223,8 +1996,6 @@
   }
 
   /**
-   * Get an element position on the page
-   * Thanks to `meouw`: http://stackoverflow.com/a/442474/375966
    *
    * @api private
    * @method _getOffset
@@ -2246,8 +2017,6 @@
   }
 
   /**
-  * Find the nearest scrollable parent
-  * copied from https://stackoverflow.com/questions/35939886/find-first-scrollable-parent
   *
   * @param Element element
   * @return Element
@@ -2271,7 +2040,6 @@
   }
 
   /**
-  * scroll a scrollable element to a child element
   *
   * @param Element parent
   * @param Element element
@@ -2282,7 +2050,6 @@
   }
 
   /**
-   * Gets the current progress percentage
    *
    * @api private
    * @method _getProgress
@@ -2295,9 +2062,6 @@
   }
 
   /**
-   * Overwrites obj1's values with obj2's and adds obj2's if non existent in obj1
-   * via: http://stackoverflow.com/questions/171251/how-can-i-merge-properties-of-two-javascript-objects-dynamically
-   *
    * @param obj1
    * @param obj2
    * @returns obj3 a new object based on obj1 and obj2
@@ -2329,16 +2093,13 @@
     } else {
       instance = new IntroJs(document.body);
     }
-    // add instance to list of _instances
-    // passing group to _stamp to increment
-    // from 0 onward somewhat reliably
+ 
     introJs.instances[ _stamp(instance, 'introjs-instance') ] = instance;
 
     return instance;
   };
 
   /**
-   * Current IntroJs version
    *
    * @property version
    * @type String
@@ -2346,7 +2107,6 @@
   introJs.version = VERSION;
 
   /**
-  * key-val object helper for introJs instances
   *
   * @property instances
   * @type Object
