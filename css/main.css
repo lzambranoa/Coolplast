@@ -26,8 +26,8 @@ html {
 body {
     background: #A770EF;
     background: -webkit-linear-gradient(to bottom, #FDB99B, #CF8BF3, #A770EF);
-    background: linear-gradient(to bottom, #FDB99B, #CF8BF3, #A770EF);
-    background-repeat: no-repeat;
+    background: linear-gradient(to bottom, #CF8BF3, #f5ac8d, #CF8BF3);
+    background-repeat: repeat;
 }
 
 
@@ -252,7 +252,7 @@ input[type='image'] {
 /*BOTONES*/
 
 .btn {
-    background-color: #4CAF50;
+    background-color: #4a48cf;
     border: none;
     color: white;
     padding: 7px 15px;
@@ -264,8 +264,8 @@ input[type='image'] {
 }
 
 .btn:hover {
-    background-color: #4CAF50;
-    border: 3px solid darkgreen;
+    background-color: #2f3db9;
+    border: 3px solid rgb(0, 15, 100);
     padding: 4px 12px;
 }
 
@@ -280,12 +280,12 @@ input[type='image'] {
 }
 
 .btn.neutral {
-    background-color: gray;
+    background-color: rgb(101, 66, 226);
 }
 
 .btn.neutral:hover {
-    background-color: gray;
-    border: 3px solid darkslategray;
+    background-color: rgb(58, 66, 187);
+    border: 3px solid rgb(6, 16, 151);
     padding: 4px 12px;
 }
 
